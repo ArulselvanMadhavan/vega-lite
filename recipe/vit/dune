@@ -1,4 +1,4 @@
 (executable
  (name main)
- (public_name demo)
+ (public_name vit)
  (libraries vega-lite csv common))

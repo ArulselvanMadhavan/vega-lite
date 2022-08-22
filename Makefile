@@ -20,3 +20,6 @@ init:
 
 demo: init
 	@dune exec demo
+
+vit: init
+	@dune exec vit

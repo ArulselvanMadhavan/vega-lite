@@ -182,7 +182,7 @@ module Transform : sig
       See https://vega.github.io/vega-lite/docs/filter.html *)
   val filter : ?opts:(string * json) list -> expr:string -> unit -> t
 
-   (** Random sampling of data. *)
+  (** Random sampling of data. *)
   val sample : ?opts:(string * json) list -> max:int -> unit -> t
 
   type window_axis

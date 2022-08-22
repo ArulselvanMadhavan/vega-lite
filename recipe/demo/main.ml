@@ -6,31 +6,6 @@ let build_from_csv name =
   Data.inline ~name ~format_ @@ `String csv_contents
 ;;
 
-let output_dir = "outputs/"
-let json_ext = ".json"
-let html_ext = ".html"
-
-let head =
-  {|
-    <head>
-<script src="https://cdn.jsdelivr.net/npm/vega@5"></script>
-<script src="https://cdn.jsdelivr.net/npm/vega-lite@5"></script>
-<script src="https://cdn.jsdelivr.net/npm/vega-embed@6"></script>
-    </head> 
-|}
-;;
-
-let body spec =
-  {|<body
-     <div id="vis"></div>
-     <script>vegaEmbed("#vis",|}
-  ^ spec
-  ^ {|);</script>
-   </body>|}
-;;
-
-let gen_html spec = "<html>" ^ head ^ body spec ^ "</html>"
-
 (* Default configs *)
 let default_width = 600
 let overview_height = 60
@@ -71,7 +46,7 @@ let detailed name filter_expr thold title =
   let circle_mark =
     Mark.circle ~opts:[ "tooltip", `Assoc [ "content", `String "data" ] ] ()
   in
-  let filter_std = Transform.filter_with_string ~expr:filter_expr () in
+  let filter_std = Transform.filter ~expr:filter_expr () in
   let scale_json = `Assoc [ "domain", `Assoc [ "param", `String "brush" ] ] in
   let x_encoding =
     Encoding.field `x ~name:"layer" ~type_:`ordinal ~scale:(`other scale_json) ()
@@ -95,9 +70,7 @@ let detailed name filter_expr thold title =
     Viz.make
       ~transform:
         [ filter_std
-        ; Transform.filter_with_string
-            ~expr:("datum.value >= " ^ Float.to_string thold)
-            ()
+        ; Transform.filter ~expr:("datum.value >= " ^ Float.to_string thold) ()
         ]
       ~data:(Data.name name)
       ~mark:(Mark.circle ())
@@ -157,10 +130,10 @@ let () =
   let name = "resnet18" in
   let data = build_from_csv name in
   let viz = dashboard name data in
-  Viz.to_json_file viz ~file:(output_dir ^ name ^ json_ext);
+  Viz.to_json_file viz ~file:(Common.output_dir ^ name ^ Common.json_ext);
   let spec = Viz.to_json_str viz in
-  let html = gen_html spec in
+  let html = Common.gen_html spec in
   Out_channel.with_open_text
-    (output_dir ^ name ^ html_ext)
+    (Common.output_dir ^ name ^ Common.html_ext)
     (fun out_ch -> Out_channel.output_string out_ch html)
 ;;

@@ -332,12 +332,9 @@ module Transform = struct
     "aggregate", `Assoc []
      *)
 
-  let aggregate1 ?(opts=[]) op : t =
-    ["aggregate", Aggregate.to_json op] @ opts
-
-  let filter ?(opts=[]) ~expr () = ["filter", `String expr] @ opts
-  let sample ?(opts=[]) ~max () = ["sample", `Assoc ["sample", `Int max]] @ opts
-
+  let aggregate1 ?(opts = []) op : t = [ "aggregate", Aggregate.to_json op ] @ opts
+  let filter ?(opts = []) ~expr () = [ "filter", `String expr ] @ opts
+  let sample ?(opts = []) ~max () = [ "sample", `Assoc [ "sample", `Int max ] ] @ opts
   let other j : t = j
 end
 
