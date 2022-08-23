@@ -354,7 +354,8 @@ module Encoding : sig
   val field : (name:string -> type_:field_type -> unit -> channel_def) field_builder
 
   (** Use the value of the given repeated variable (see {!Viz}) *)
-  val field_repeat_var : (string -> channel_def) field_builder
+  val field_repeat_var
+    : (name:string -> type_:field_type -> unit -> channel_def) field_builder
 
   (** Same as [field_repeat_var "repeat"] *)
   val field_repeat : (unit -> channel_def) field_builder

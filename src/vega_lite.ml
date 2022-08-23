@@ -584,7 +584,18 @@ module Encoding = struct
       ()
   ;;
 
-  let field_repeat_var channel ?bin ?scale ?title ?aggregate ?sort ?transform ?opts name
+  let field_repeat_var
+    channel
+    ?bin
+    ?scale
+    ?title
+    ?aggregate
+    ?sort
+    ?transform
+    ?opts
+    ~name
+    ~type_
+    ()
     : channel_def
     =
     field_
@@ -597,7 +608,7 @@ module Encoding = struct
       ?transform
       ?opts
       ~field:(`Repeat name)
-      ~type_:None
+      ~type_:(Some type_)
       ()
   ;;
 
