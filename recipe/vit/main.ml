@@ -1,11 +1,11 @@
 open Vega_lite
 
-let build_from_csv model name fname =
+let build_from_csv fname =
   let csv_contents =
-    In_channel.with_open_text ("data/" ^ model ^ "/" ^ fname) In_channel.input_all
+    In_channel.with_open_text fname In_channel.input_all
   in
   let format_ = Data_format.make ~type_:`Csv () in
-  Data.inline ~name ~format_ @@ `String csv_contents
+  Data.inline ~name:fname ~format_ @@ `String csv_contents
 ;;
 
 let eval_dashboard _name data =
@@ -34,6 +34,23 @@ let acc_zoom name _data =
       ~encoding:Encoding.[ datum_i `y 99; value_s `color "red" ]
       ()
   in
+  let text_viz =
+    Viz.make
+      ~data:(Data.name name)
+      ~mark:
+        (Mark.other
+           ~type_:"text"
+           ~opts:
+             [ "text", `String "99% threshold"
+             ; "align", `String "right"
+             ; "baseline", `String "middle"
+             ; "x", `String "width"
+             ; "dx", `Int 75
+             ]
+           ())
+      ~encoding:Encoding.[ datum_f `y 99. ]
+      ()
+  in
   let bar_viz =
     Viz.make
       ~data:(Data.name name)
@@ -58,7 +75,7 @@ let acc_zoom name _data =
           ]
       ()
   in
-  Viz.layer [ rule_viz; bar_viz ]
+  Viz.layer [ rule_viz; text_viz; bar_viz ]
 ;;
 
 let noise_dashboard _name data =
@@ -79,18 +96,22 @@ let noise_dashboard _name data =
   Viz.repeat ~row:[ "mean"; "std" ] ~data:(Data.name "empty") base_viz
 ;;
 
-let dashboard folder_name =
-  let eval_data_name = "eval_" ^ folder_name in
-  let layer_data_name = "layer_" ^ folder_name in
-  let eval_data = build_from_csv folder_name eval_data_name "eval.csv" in
-  let noise_data = build_from_csv folder_name layer_data_name "layer.csv" in
-  let eval_viz = eval_dashboard eval_data_name eval_data in
-  let noise_viz = noise_dashboard layer_data_name noise_data in
-  let acc_zoom_viz = acc_zoom eval_data_name eval_data in
+
+let eval_file_path = ref ""
+let layer_file_path = ref ""
+let out_dir = ref ""
+let model_name = ref ""
+
+let dashboard () =
+  let eval_data = build_from_csv !eval_file_path in
+  let noise_data = build_from_csv !layer_file_path in
+  let eval_viz = eval_dashboard !eval_file_path eval_data in
+  let noise_viz = noise_dashboard !layer_file_path noise_data in
+  let acc_zoom_viz = acc_zoom !eval_file_path eval_data in
   Viz.hconcat
     ~title:
       (`obj
-        { text = String.capitalize_ascii folder_name ^ " dashboard"
+        { text = String.capitalize_ascii !model_name ^ " dashboard"
         ; color = "green"
         ; dy = -50
         ; font_size = 24
@@ -99,13 +120,27 @@ let dashboard folder_name =
     [ eval_viz; Viz.vconcat [ acc_zoom_viz; noise_viz ] ]
 ;;
 
+let speclist =
+  [ "-n", Arg.Set_string model_name, "Model Name"
+  ; "-e", Arg.Set_string eval_file_path, "Path to eval_results.csv"
+  ; "-l", Arg.Set_string layer_file_path, "Path to layer_results.csv"
+  ; "-o", Arg.Set_string out_dir, "Output dir"
+  ]
+;;
+
+
+let anon_fun doc = print_string doc
+
+let usage_msg =
+  "main.exe -n -e -l -o"
+;;
+
 let () =
-  let name = "vit" in
-  let dashboard = dashboard name in
-  Viz.to_json_file dashboard ~file:(Common.output_dir ^ name ^ Common.json_ext);
+  Arg.parse speclist anon_fun usage_msg;
+  let dashboard = dashboard () in
+  Viz.to_json_file dashboard ~file:( !out_dir ^ "/" ^ "idiom-dashboard" ^ Common.vl_json_ext);
   let spec = Viz.to_json_str dashboard in
   let html = Common.gen_html spec in
   Out_channel.with_open_text
-    (Common.output_dir ^ name ^ Common.html_ext)
+    (!out_dir ^ "/" ^ "idiom-dashboard" ^ Common.html_ext)
     (fun out_ch -> Out_channel.output_string out_ch html)
-;;
