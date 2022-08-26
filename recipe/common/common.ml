@@ -22,3 +22,4 @@ let body spec =
 ;;
 
 let gen_html spec = "<html>" ^ head ^ body spec ^ "</html>"
+let tooltip = "tooltip", `Assoc [ "content", `String "data" ]

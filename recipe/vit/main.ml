@@ -13,23 +13,59 @@ let eval_dashboard _name data =
     Encoding.
       [ field `x ~name:"model" ~type_:`nominal ()
       ; field_repeat_var `y ~name:"row" ~type_:`quantitative ()
-      ; field `xOffset ~name:"hw" ~type_:`nominal ()
-      ; field `color ~name:"hw" ~type_:`nominal ()
+      ; field `xOffset ~name:"hardware" ~type_:`nominal ()
+      ; field `color ~name:"hardware" ~type_:`nominal ()
       ]
   in
   let base_viz =
+    Viz.make ~data ~mark:(Mark.bar ~opts:[ Common.tooltip ] ()) ~encoding ()
+  in
+  Viz.repeat
+    ~row:[ "accuracy"; "loss"; "elapsed_time" ]
+    ~data:(Data.name "empty")
+    base_viz
+;;
+
+let acc_zoom name _data =
+  let rule_viz =
     Viz.make
-      ~data
-      ~mark:(Mark.bar ~opts:[ "tooltip", `Assoc [ "content", `String "data" ] ] ())
-      ~encoding
+      ~data:(Data.name name)
+      ~mark:(Mark.other ~type_:"rule" ())
+      ~encoding:Encoding.[ datum_i `y 99; value_s `color "red" ]
       ()
   in
-  Viz.repeat ~row:[ "acc"; "loss"; "elapsed_time" ] ~data:(Data.name "empty") base_viz
+  let bar_viz =
+    Viz.make
+      ~data:(Data.name name)
+      ~mark:(Mark.other ~type_:"bar" ~opts:[ Common.tooltip ] ())
+      ~encoding:
+        Encoding.
+          [ field `x ~name:"model" ~type_:`nominal ()
+          ; field `xOffset ~name:"hardware" ~type_:`nominal ()
+          ; field
+              `color
+              ~name:"hardware"
+              ~type_:`nominal
+              ~opts:[ "legend", `Assoc [ "title", `Null ] ]
+              ()
+          ; field
+              `y
+              ~title:"% of FP32"
+              ~name:"fp32Percent"
+              ~type_:`quantitative
+              ~scale:(`other (`Assoc [ "domainMin", `Int 90; "clamp", `Bool true ]))
+              ()
+          ]
+      ()
+  in
+  Viz.layer [ rule_viz; bar_viz ]
 ;;
 
 let noise_dashboard _name data =
   let base_viz =
     Viz.make
+      ~width:(`int 400)
+      ~title:(`string "Layerwise Noise Distribution")
       ~data
       ~mark:(Mark.line ())
       ~encoding:
@@ -43,14 +79,24 @@ let noise_dashboard _name data =
   Viz.repeat ~row:[ "mean"; "std" ] ~data:(Data.name "empty") base_viz
 ;;
 
-let dashboard name =
-  let eval_name = "eval_" ^ name in
-  let layer_name = "layer_" ^ name in
-  let eval_data = build_from_csv name eval_name "eval.csv" in
-  let noise_data = build_from_csv name layer_name "layer.csv" in
-  let eval_viz = eval_dashboard eval_name eval_data in
-  let noise_viz = noise_dashboard layer_name noise_data in
-  Viz.hconcat [ eval_viz; noise_viz ]
+let dashboard folder_name =
+  let eval_data_name = "eval_" ^ folder_name in
+  let layer_data_name = "layer_" ^ folder_name in
+  let eval_data = build_from_csv folder_name eval_data_name "eval.csv" in
+  let noise_data = build_from_csv folder_name layer_data_name "layer.csv" in
+  let eval_viz = eval_dashboard eval_data_name eval_data in
+  let noise_viz = noise_dashboard layer_data_name noise_data in
+  let acc_zoom_viz = acc_zoom eval_data_name eval_data in
+  Viz.hconcat
+    ~title:
+      (`obj
+        { text = String.capitalize_ascii folder_name ^ " dashboard"
+        ; color = "green"
+        ; dy = -50
+        ; font_size = 24
+        ; anchor = "middle"
+        })
+    [ eval_viz; Viz.vconcat [ acc_zoom_viz; noise_viz ] ]
 ;;
 
 let () =

@@ -173,7 +173,15 @@ module Transform : sig
   val aggregate : aggregate_axis list -> groupby:string list -> unit -> t
   *)
 
+  val join_aggregate1
+    :  groupby:string list
+    -> op:string
+    -> field:string
+    -> as_:string
+    -> t
+
   val aggregate1 : ?opts:(string * json) list -> Aggregate.t -> t
+  val calculate : as_:string -> string -> t
 
   (** Filter data.
       Example: [filter ~expr:"datum.x > 10" ()]. The expression receives
@@ -460,11 +468,19 @@ module Viz : sig
   (** The main visualization type. *)
   type t
 
+  type title =
+    { text : string
+    ; color : string
+    ; font_size : int
+    ; anchor : string
+    ; dy : int
+    }
+
   (** With options *)
   type 'a with_config =
     ?width:[ `container | `int of int ]
     -> ?height:[ `container | `int of int ]
-    -> ?title:string
+    -> ?title:[ `string of string | `obj of title ]
     -> ?config:Config.t
     -> ?params:Param.t list
     -> 'a

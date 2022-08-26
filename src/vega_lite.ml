@@ -332,6 +332,18 @@ module Transform = struct
     "aggregate", `Assoc []
      *)
 
+  let join_aggregate1 ~groupby ~op ~field ~as_ =
+    let ja =
+      [ ( "joinaggregate"
+        , `List [ `Assoc [ "op", `String op; "field", `String field; "as", `String as_ ] ]
+        )
+      ]
+    in
+    let ga = [ "groupby", `List (List.map (fun s -> `String s) groupby) ] in
+    ja @ ga
+  ;;
+
+  let calculate ~as_ expr = [ "calculate", `String expr; "as", `String as_ ]
   let aggregate1 ?(opts = []) op : t = [ "aggregate", Aggregate.to_json op ] @ opts
   let filter ?(opts = []) ~expr () = [ "filter", `String expr ] @ opts
   let sample ?(opts = []) ~max () = [ "sample", `Assoc [ "sample", `Int max ] ] @ opts
@@ -849,11 +861,19 @@ module Viz = struct
         ; layer : string list option
         }
 
+  type title =
+    { text : string
+    ; color : string
+    ; font_size : int
+    ; anchor : string
+    ; dy : int
+    }
+
   type t =
     { config : Config.t option
     ; width : [ `container | `int of int ] option
     ; height : [ `container | `int of int ] option
-    ; title : string option
+    ; title : [ `string of string | `obj of title ] option
     ; params : Param.t list option
     ; view : view
     }
@@ -882,10 +902,20 @@ module Viz = struct
   type 'a with_config =
     ?width:[ `container | `int of int ]
     -> ?height:[ `container | `int of int ]
-    -> ?title:string
+    -> ?title:[ `string of string | `obj of title ]
     -> ?config:Config.t
     -> ?params:Param.t list
     -> 'a
+
+  let json_of_title title =
+    `Assoc
+      [ "text", `String title.text
+      ; "color", `String title.color
+      ; "fontSize", `Int title.font_size
+      ; "anchor", `String title.anchor
+      ; "dy", `Int title.dy
+      ]
+  ;;
 
   let bind ~var l : repeat_binding = { var; values = l }
   let bind_i ~var l = bind ~var (List.map i2j l)
@@ -975,7 +1005,8 @@ module Viz = struct
            | Some j -> [ "config", j ])
         ; (match title with
            | None -> []
-           | Some s -> [ "title", `String s ])
+           | Some (`string s) -> [ "title", `String s ]
+           | Some (`obj title) -> [ "title", json_of_title title ])
         ; (match params with
            | None -> []
            | Some p -> [ "params", `List (List.map Param.to_json p) ])

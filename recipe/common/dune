@@ -1,3 +1,4 @@
 (library
  (name common)
- (synopsis "Constants & Configs"))
+ (synopsis "Constants & Configs")
+ (libraries vega-lite))
