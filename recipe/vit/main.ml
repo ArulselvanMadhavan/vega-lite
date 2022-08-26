@@ -138,9 +138,9 @@ let usage_msg =
 let () =
   Arg.parse speclist anon_fun usage_msg;
   let dashboard = dashboard () in
-  Viz.to_json_file dashboard ~file:( !out_dir ^ "/" ^ "idiom-dashboard" ^ Common.vl_json_ext);
+  Viz.to_json_file dashboard ~file:( !out_dir ^ "/" ^ "dashboard" ^ Common.vl_json_ext);
   let spec = Viz.to_json_str dashboard in
   let html = Common.gen_html spec in
   Out_channel.with_open_text
-    (!out_dir ^ "/" ^ "idiom-dashboard" ^ Common.html_ext)
+    (!out_dir ^ "/" ^ "dashboard" ^ Common.html_ext)
     (fun out_ch -> Out_channel.output_string out_ch html)
