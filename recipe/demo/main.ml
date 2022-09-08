@@ -34,7 +34,7 @@ let overview name =
   Viz.make
     ~height:(`int overview_height)
     ~width:(`int default_width)
-    ~title:"Overview of Layer wise noise stats"
+    ~title:(`string "Overview of Layer wise noise stats")
     ~params:[ brush_param ]
     ~data:(Data.name name)
     ~mark
@@ -102,7 +102,7 @@ let detailed name filter_expr thold title =
       ()
   in
   Viz.layer
-    ~title:("Detailed View - " ^ title)
+    ~title:(`string ("Detailed View - " ^ title))
     ~width:(`int default_width)
     [ circle_layer; rule_layer; t_circle_layer; t_line_layer; t_text_layer ]
 ;;

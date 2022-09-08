@@ -23,3 +23,6 @@ demo: init
 
 vit: init
 	@dune exec vit
+
+layer: init
+	@dune exec layer

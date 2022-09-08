@@ -1,0 +1,18 @@
+<html>
+    <head>
+<script src="https://cdn.jsdelivr.net/npm/vega@5"></script>
+<script src="https://cdn.jsdelivr.net/npm/vega-lite@5"></script>
+<script src="https://cdn.jsdelivr.net/npm/vega-embed@6"></script>
+    </head> 
+<body
+     <div id="vis"></div>
+     <script>vegaEmbed("#vis",{
+  "$schema": "https://vega.github.io/schema/vega-lite/v5.json",
+  "mark": "line",
+  "encoding": {
+    "x": { "field": "layer_id", "bin": false, "type": "quantitative" },
+    "y": { "field": "value", "bin": false, "type": "quantitative" }
+  },
+  "data": { "url": "output.csv", "name": null, "format": null }
+});</script>
+   </body></html>

@@ -2,6 +2,7 @@ let output_dir = "outputs/"
 let json_ext = ".json"
 let html_ext = ".html"
 let vl_json_ext = ".vl.json"
+
 let head =
   {|
     <head>

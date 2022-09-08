@@ -1,9 +1,7 @@
 open Vega_lite
 
 let build_from_csv fname =
-  let csv_contents =
-    In_channel.with_open_text fname In_channel.input_all
-  in
+  let csv_contents = In_channel.with_open_text fname In_channel.input_all in
   let format_ = Data_format.make ~type_:`Csv () in
   Data.inline ~name:fname ~format_ @@ `String csv_contents
 ;;
@@ -96,7 +94,6 @@ let noise_dashboard _name data =
   Viz.repeat ~row:[ "mean"; "std" ] ~data:(Data.name "empty") base_viz
 ;;
 
-
 let eval_file_path = ref ""
 let layer_file_path = ref ""
 let out_dir = ref ""
@@ -128,19 +125,16 @@ let speclist =
   ]
 ;;
 
-
 let anon_fun doc = print_string doc
-
-let usage_msg =
-  "main.exe -n -e -l -o"
-;;
+let usage_msg = "main.exe -n -e -l -o"
 
 let () =
   Arg.parse speclist anon_fun usage_msg;
   let dashboard = dashboard () in
-  Viz.to_json_file dashboard ~file:( !out_dir ^ "/" ^ "dashboard" ^ Common.vl_json_ext);
+  Viz.to_json_file dashboard ~file:(!out_dir ^ "/" ^ "dashboard" ^ Common.vl_json_ext);
   let spec = Viz.to_json_str dashboard in
   let html = Common.gen_html spec in
   Out_channel.with_open_text
     (!out_dir ^ "/" ^ "dashboard" ^ Common.html_ext)
     (fun out_ch -> Out_channel.output_string out_ch html)
+;;
