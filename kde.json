@@ -1,0 +1,852 @@
+{
+  "$schema": "https://vega.github.io/schema/vega/v5.json",
+  "padding": 5,
+  "autosize": "pad",
+  "config": {
+    "text": {
+      "font": "Ideal Sans, Avenir Next, Helvetica"
+    },
+    "title": {
+      "font": "Ideal Sans, Avenir Next, Helvetica",
+      "fontWeight": 500,
+      "fontSize": 17,
+      "limit": -1
+    },
+    "axis": {
+      "labelFont": "Ideal Sans, Avenir Next, Helvetica",
+      "labelFontSize": 12
+    }
+  },
+  "signals": [
+    {
+      "name": "child_width",
+      "value": 350
+    },
+    {
+      "name": "child_height",
+      "value": 380
+    },
+    {
+      "name": "layers",
+      "value": [
+        "layer_0",
+        "layer_1",
+        "layer_2",
+        "layer_3",
+        "layer_4",
+        "layer_5",
+        "layer_6",
+        "layer_7",
+        "layer_8",
+        "layer_9",
+        "layer_10",
+        "layer_11",
+        "layer_12",
+        "layer_13",
+        "layer_14",
+        "layer_15",
+        "layer_16",
+        "layer_17",
+        "layer_18"
+      ]
+    }
+  ],
+  "scales": [
+    {
+      "name": "weight_xscale",
+      "type": "linear",
+      "domain": {
+        "data": "weight_0",
+        "field": "value"
+      },
+      "range": [
+        0,
+        {
+          "signal": "child_width"
+        }
+      ],
+      "nice": true,
+      "zero": true
+    },
+    {
+      "name": "weight_yscale",
+      "type": "band",
+      "range": [
+        0,
+        {
+          "signal": "child_height"
+        }
+      ],
+      "round": true,
+      "padding": 0,
+      "domain": {
+        "signal": "layers"
+      }
+    },
+    {
+      "name": "bias_xscale",
+      "type": "linear",
+      "domain": {
+        "data": "bias_0",
+        "field": "value"
+      },
+      "range": [
+        0,
+        {
+          "signal": "child_width"
+        }
+      ],
+      "nice": true,
+      "zero": true
+    },
+    {
+      "name": "bias_yscale",
+      "type": "band",
+      "range": [
+        0,
+        {
+          "signal": "child_height"
+        }
+      ],
+      "round": true,
+      "padding": 0,
+      "domain": {
+        "signal": "layers"
+      }
+    },
+    {
+      "name": "activation_xscale",
+      "type": "linear",
+      "domain": {
+        "data": "activation_0",
+        "field": "value"
+      },
+      "range": [
+        0,
+        {
+          "signal": "child_width"
+        }
+      ],
+      "nice": true,
+      "zero": true
+    },
+    {
+      "name": "activation_yscale",
+      "type": "band",
+      "range": [
+        0,
+        {
+          "signal": "child_height"
+        }
+      ],
+      "round": true,
+      "padding": 0,
+      "domain": {
+        "signal": "layers"
+      }
+    },
+    {
+      "name": "color",
+      "type": "ordinal",
+      "domain": {
+        "fields": [
+          {
+            "data": "weight_0",
+            "field": "layer_name"
+          },
+          {
+            "data": "bias_0",
+            "field": "layer_name"
+          },
+          {
+            "data": "activation_0",
+            "field": "layer_name"
+          }
+        ]
+      },
+      "range": "category"
+    }
+  ],
+  "data": [
+    {
+      "name": "weight_0",
+      "url": "data/weight.csv",
+      "format": {
+        "type": "csv"
+      },
+      "transform": [
+        {
+          "type": "kde",
+          "field": "value",
+          "groupby": [
+            "layer_name"
+          ],
+          "extent": [
+            -1,
+            2
+          ],
+          "as": [
+            "value",
+            "density"
+          ],
+          "steps": 200
+        }
+      ]
+    },
+    {
+      "name": "bias_0",
+      "url": "data/bias.csv",
+      "format": {
+        "type": "csv"
+      },
+      "transform": [
+        {
+          "type": "kde",
+          "field": "value",
+          "groupby": [
+            "layer_name"
+          ],
+          "extent": [
+            -1,
+            2
+          ],
+          "as": [
+            "value",
+            "density"
+          ],
+          "steps": 200
+        }
+      ]
+    },
+    {
+      "name": "activation_0",
+      "url": "data/activation.csv",
+      "format": {
+        "type": "csv"
+      },
+      "transform": [
+        {
+          "type": "kde",
+          "field": "value",
+          "groupby": [
+            "layer_name"
+          ],
+          "extent": [
+            -1,
+            2
+          ],
+          "as": [
+            "value",
+            "density"
+          ],
+          "steps": 200
+        }
+      ]
+    }
+  ],
+  "marks": [
+    {
+      "type": "group",
+      "name": "concat_group",
+      "layout": {
+        "padding": 20,
+        "columns": 3,
+        "bounds": "full",
+        "align": "all"
+      },
+      "marks": [
+        {
+          "type": "group",
+          "style": "cell",
+          "name": "concat_weight",
+          "marks": [
+            {
+              "name": "column_footer",
+              "type": "group",
+              "role": "column-footer",
+              "encode": {
+                "update": {
+                  "width": {
+                    "signal": "child_width"
+                  },
+                  "height": {
+                    "signal": "child_height"
+                  }
+                }
+              },
+              "axes": [
+                {
+                  "scale": "weight_xscale",
+                  "orient": "bottom",
+                  "grid": false,
+                  "title": "weight distribution",
+                  "labelFlush": true,
+                  "labelOverlap": true,
+                  "tickCount": {
+                    "signal": "ceil(child_width/40)"
+                  },
+                  "ticks": true,
+                  "zindex": 0
+                }
+              ]
+            },
+            {
+              "type": "group",
+              "from": {
+                "facet": {
+                  "data": "weight_0",
+                  "name": "category",
+                  "groupby": "layer_name"
+                }
+              },
+              "encode": {
+                "update": {
+                  "y": {
+                    "field": "layer_name",
+                    "scale": "weight_yscale"
+                  },
+                  "width": {
+                    "signal": "child_width"
+                  },
+                  "height": {
+                    "scale": "weight_yscale",
+                    "band": 1
+                  }
+                }
+              },
+              "signals": [
+                {
+                  "name": "height",
+                  "update": "bandwidth('weight_yscale')"
+                }
+              ],
+              "scales": [
+                {
+                  "name": "yinner",
+                  "type": "linear",
+                  "range": [
+                    {
+                      "signal": "height"
+                    },
+                    0
+                  ],
+                  "domain": [
+                    0,
+                    1
+                  ]
+                }
+              ],
+              "marks": [
+                {
+                  "type": "area",
+                  "from": {
+                    "data": "category"
+                  },
+                  "encode": {
+                    "enter": {
+                      "fill": {
+                        "scale": "color",
+                        "field": {
+                          "parent": "layer_name"
+                        }
+                      },
+                      "fillOpacity": {
+                        "value": 0.7
+                      },
+                      "stroke": {
+                        "value": "white"
+                      },
+                      "strokeWidth": {
+                        "value": 1
+                      }
+                    },
+                    "update": {
+                      "x": {
+                        "scale": "weight_xscale",
+                        "field": "value"
+                      },
+                      "y": {
+                        "scale": "yinner",
+                        "field": "density"
+                      },
+                      "y2": {
+                        "scale": "yinner",
+                        "value": 0
+                      }
+                    }
+                  }
+                },
+                {
+                  "type": "rule",
+                  "clip": true,
+                  "encode": {
+                    "update": {
+                      "y": {
+                        "signal": "height",
+                        "offset": -0.5
+                      },
+                      "x": {
+                        "scale": "weight_xscale",
+                        "field": {
+                          "parent": "value"
+                        }
+                      },
+                      "x2": {
+                        "signal": "child_width"
+                      },
+                      "stroke": {
+                        "value": "#aaa"
+                      },
+                      "strokeWidth": {
+                        "value": 0.25
+                      },
+                      "strokeOpacity": {
+                        "value": 1
+                      }
+                    }
+                  }
+                }
+              ]
+            }
+          ],
+          "axes": [
+            {
+              "scale": "weight_xscale",
+              "orient": "bottom",
+              "domain": false,
+              "labels": false,
+              "aria": false,
+              "maxExtent": 0,
+              "minExtent": 0,
+              "ticks": false,
+              "zindex": 0
+            },
+            {
+              "orient": "left",
+              "scale": "weight_yscale",
+              "domain": false,
+              "ticks": false,
+              "encode": {
+                "labels": {
+                  "update": {
+                    "width": {
+                      "signal": "child_width"
+                    },
+                    "dx": {
+                      "value": 2
+                    },
+                    "dy": {
+                      "value": 2
+                    },
+                    "y": {
+                      "scale": "weight_yscale",
+                      "field": "value",
+                      "band": 1
+                    },
+                    "baseline": {
+                      "value": "bottom"
+                    }
+                  }
+                }
+              }
+            }
+          ]
+        },
+        {
+          "type": "group",
+          "style": "cell",
+          "name": "concat_bias",
+          "marks": [
+            {
+              "name": "column_footer",
+              "type": "group",
+              "role": "column-footer",
+              "encode": {
+                "update": {
+                  "width": {
+                    "signal": "child_width"
+                  },
+                  "height": {
+                    "signal": "child_height"
+                  }
+                }
+              },
+              "axes": [
+                {
+                  "scale": "bias_xscale",
+                  "orient": "bottom",
+                  "grid": false,
+                  "title": "bias distribution",
+                  "labelFlush": true,
+                  "labelOverlap": true,
+                  "tickCount": {
+                    "signal": "ceil(child_width/40)"
+                  },
+                  "ticks": true,
+                  "zindex": 0
+                }
+              ]
+            },
+            {
+              "type": "group",
+              "from": {
+                "facet": {
+                  "data": "bias_0",
+                  "name": "category",
+                  "groupby": "layer_name"
+                }
+              },
+              "encode": {
+                "update": {
+                  "y": {
+                    "field": "layer_name",
+                    "scale": "bias_yscale"
+                  },
+                  "width": {
+                    "signal": "child_width"
+                  },
+                  "height": {
+                    "scale": "bias_yscale",
+                    "band": 1
+                  }
+                }
+              },
+              "signals": [
+                {
+                  "name": "height",
+                  "update": "bandwidth('bias_yscale')"
+                }
+              ],
+              "scales": [
+                {
+                  "name": "yinner",
+                  "type": "linear",
+                  "range": [
+                    {
+                      "signal": "height"
+                    },
+                    0
+                  ],
+                  "domain": [
+                    0,
+                    1
+                  ]
+                }
+              ],
+              "marks": [
+                {
+                  "type": "area",
+                  "from": {
+                    "data": "category"
+                  },
+                  "encode": {
+                    "enter": {
+                      "fill": {
+                        "scale": "color",
+                        "field": {
+                          "parent": "layer_name"
+                        }
+                      },
+                      "fillOpacity": {
+                        "value": 0.7
+                      },
+                      "stroke": {
+                        "value": "white"
+                      },
+                      "strokeWidth": {
+                        "value": 1
+                      }
+                    },
+                    "update": {
+                      "x": {
+                        "scale": "bias_xscale",
+                        "field": "value"
+                      },
+                      "y": {
+                        "scale": "yinner",
+                        "field": "density"
+                      },
+                      "y2": {
+                        "scale": "yinner",
+                        "value": 0
+                      }
+                    }
+                  }
+                },
+                {
+                  "type": "rule",
+                  "clip": true,
+                  "encode": {
+                    "update": {
+                      "y": {
+                        "signal": "height",
+                        "offset": -0.5
+                      },
+                      "x": {
+                        "scale": "bias_xscale",
+                        "field": {
+                          "parent": "value"
+                        }
+                      },
+                      "x2": {
+                        "signal": "child_width"
+                      },
+                      "stroke": {
+                        "value": "#aaa"
+                      },
+                      "strokeWidth": {
+                        "value": 0.25
+                      },
+                      "strokeOpacity": {
+                        "value": 1
+                      }
+                    }
+                  }
+                }
+              ]
+            }
+          ],
+          "axes": [
+            {
+              "scale": "bias_xscale",
+              "orient": "bottom",
+              "domain": false,
+              "labels": false,
+              "aria": false,
+              "maxExtent": 0,
+              "minExtent": 0,
+              "ticks": false,
+              "zindex": 0
+            },
+            {
+              "orient": "left",
+              "scale": "bias_yscale",
+              "domain": false,
+              "ticks": false,
+              "encode": {
+                "labels": {
+                  "update": {
+                    "width": {
+                      "signal": "child_width"
+                    },
+                    "dx": {
+                      "value": 2
+                    },
+                    "dy": {
+                      "value": 2
+                    },
+                    "y": {
+                      "scale": "bias_yscale",
+                      "field": "value",
+                      "band": 1
+                    },
+                    "baseline": {
+                      "value": "bottom"
+                    }
+                  }
+                }
+              }
+            }
+          ]
+        },
+        {
+          "type": "group",
+          "style": "cell",
+          "name": "concat_activation",
+          "marks": [
+            {
+              "name": "column_footer",
+              "type": "group",
+              "role": "column-footer",
+              "encode": {
+                "update": {
+                  "width": {
+                    "signal": "child_width"
+                  },
+                  "height": {
+                    "signal": "child_height"
+                  }
+                }
+              },
+              "axes": [
+                {
+                  "scale": "activation_xscale",
+                  "orient": "bottom",
+                  "grid": false,
+                  "title": "activation distribution",
+                  "labelFlush": true,
+                  "labelOverlap": true,
+                  "tickCount": {
+                    "signal": "ceil(child_width/40)"
+                  },
+                  "ticks": true,
+                  "zindex": 0
+                }
+              ]
+            },
+            {
+              "type": "group",
+              "from": {
+                "facet": {
+                  "data": "activation_0",
+                  "name": "category",
+                  "groupby": "layer_name"
+                }
+              },
+              "encode": {
+                "update": {
+                  "y": {
+                    "field": "layer_name",
+                    "scale": "activation_yscale"
+                  },
+                  "width": {
+                    "signal": "child_width"
+                  },
+                  "height": {
+                    "scale": "activation_yscale",
+                    "band": 1
+                  }
+                }
+              },
+              "signals": [
+                {
+                  "name": "height",
+                  "update": "bandwidth('activation_yscale')"
+                }
+              ],
+              "scales": [
+                {
+                  "name": "yinner",
+                  "type": "linear",
+                  "range": [
+                    {
+                      "signal": "height"
+                    },
+                    0
+                  ],
+                  "domain": [
+                    0,
+                    1
+                  ]
+                }
+              ],
+              "marks": [
+                {
+                  "type": "area",
+                  "from": {
+                    "data": "category"
+                  },
+                  "encode": {
+                    "enter": {
+                      "fill": {
+                        "scale": "color",
+                        "field": {
+                          "parent": "layer_name"
+                        }
+                      },
+                      "fillOpacity": {
+                        "value": 0.7
+                      },
+                      "stroke": {
+                        "value": "white"
+                      },
+                      "strokeWidth": {
+                        "value": 1
+                      }
+                    },
+                    "update": {
+                      "x": {
+                        "scale": "activation_xscale",
+                        "field": "value"
+                      },
+                      "y": {
+                        "scale": "yinner",
+                        "field": "density"
+                      },
+                      "y2": {
+                        "scale": "yinner",
+                        "value": 0
+                      }
+                    }
+                  }
+                },
+                {
+                  "type": "rule",
+                  "clip": true,
+                  "encode": {
+                    "update": {
+                      "y": {
+                        "signal": "height",
+                        "offset": -0.5
+                      },
+                      "x": {
+                        "scale": "activation_xscale",
+                        "field": {
+                          "parent": "value"
+                        }
+                      },
+                      "x2": {
+                        "signal": "child_width"
+                      },
+                      "stroke": {
+                        "value": "#aaa"
+                      },
+                      "strokeWidth": {
+                        "value": 0.25
+                      },
+                      "strokeOpacity": {
+                        "value": 1
+                      }
+                    }
+                  }
+                }
+              ]
+            }
+          ],
+          "axes": [
+            {
+              "scale": "activation_xscale",
+              "orient": "bottom",
+              "domain": false,
+              "labels": false,
+              "aria": false,
+              "maxExtent": 0,
+              "minExtent": 0,
+              "ticks": false,
+              "zindex": 0
+            },
+            {
+              "orient": "left",
+              "scale": "activation_yscale",
+              "domain": false,
+              "ticks": false,
+              "encode": {
+                "labels": {
+                  "update": {
+                    "width": {
+                      "signal": "child_width"
+                    },
+                    "dx": {
+                      "value": 2
+                    },
+                    "dy": {
+                      "value": 2
+                    },
+                    "y": {
+                      "scale": "activation_yscale",
+                      "field": "value",
+                      "band": 1
+                    },
+                    "baseline": {
+                      "value": "bottom"
+                    }
+                  }
+                }
+              }
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

@@ -5,8 +5,10 @@ let num_layers = 19
 let write_tensor l_idx out_ch =
   let open Owl in
   let module N = Dense.Ndarray.D in
+  let is_odd = l_idx = 15 in
   let l_idx = Float.of_int l_idx in
   let tensor = N.uniform ~a:0. ~b:1. [| 2; 4 |] in
+  let tensor = if is_odd then N.scalar_mul 2. tensor else tensor in
   let col_values = Array.map Float.to_string @@ Arr.to_array tensor in
   let l_idx = Int.to_string @@ Int.of_float l_idx in
   let l_name = "layer_" ^ l_idx in

@@ -44,21 +44,6 @@ def gen_mark(name):
         }
       },
       "signals": [{"name": "height", "update": f"bandwidth('{name}_yscale')"}],
-      "data": [
-        {
-          "name": "density",
-          "source": "category",
-          "transform": [
-            {
-              "type": "density",
-              "steps": 200,
-              "extent": {f"signal": "domain('{name}_xscale')"},
-              "distribution": {"function": "kde", "field": "value"},
-              "as": ["value", "density"]
-            }
-          ]
-        }
-      ],
       "scales": [
         {
           "name": "yinner",
@@ -122,7 +107,7 @@ kde_spec = r"""
     }
   },
   "signals": [
-    {"name": "child_width", "value": 350},
+    {"name": "child_width", "value": 250},
     {"name": "child_height", "value": 380},
     {
       "name": "layers",
