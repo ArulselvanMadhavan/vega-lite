@@ -275,7 +275,7 @@ def group_mark(names):
           }]
 
 if __name__ == "__main__":
-    names = ["weight", "bias", "activation"]
+    names = ["bias"]
     data_array = [gen_data(n) for n in names]
     scales_array = list(itertools.chain.from_iterable([gen_scales(n) for n in names]))
     scales_array = scales_array + [gen_color(names)]
@@ -283,7 +283,7 @@ if __name__ == "__main__":
     kde_spec["data"] = data_array
     kde_spec["scales"] = scales_array
     kde_spec["marks"] = group_mark(names)
-    kde_spec["signals"] = gen_signals(11)
+    kde_spec["signals"] = gen_signals(12) #Fixme
     with open("kde.json", "w+") as f:
         json.dump(kde_spec, f, indent=2)
     #print(kde_spec)

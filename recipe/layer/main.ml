@@ -1,6 +1,6 @@
 open Vega_lite
 
-let num_layers = 19
+let num_layers = 11
 
 let write_tensor l_idx out_ch =
   let open Owl in
@@ -12,6 +12,7 @@ let write_tensor l_idx out_ch =
   let col_values = Array.map Float.to_string @@ Arr.to_array tensor in
   let l_idx = Int.to_string @@ Int.of_float l_idx in
   let l_name = "layer_" ^ l_idx in
+  print_string @@ "\"" ^ l_name ^ "\",";
   Array.iter
     (fun elem ->
       Out_channel.output_string out_ch @@ l_idx ^ "," ^ l_name ^ "," ^ elem ^ "\n")
