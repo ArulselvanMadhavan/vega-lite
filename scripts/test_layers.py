@@ -8,6 +8,7 @@ data_dir = 'data/meta_data/'  # Data directory
 full_meta_data = load_meta_data(data_dir)
 layer_outputs = {}
 
+# [{name:bert, parent:null, children:[{name:encoder.layer.0, parent:bert, children:[{name:attention.self.key_data, parent:bert, }]}]}]
 sample_layer_name = "bert.encoder.layer.4.attention.self.key_data"
 # layer_id = get_layer_id()       # 4
 # layer_name = get_layer_name()   # key_data
