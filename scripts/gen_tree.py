@@ -41,6 +41,7 @@ for name in names:
     data = full_meta_data[name]
     words = word_matches.findall(name)
     if len(words) < 5:
+        check_and_insert(nodes_dict, name, name, 0)
         continue
     else:
         root = words[0]

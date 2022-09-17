@@ -1,14 +1,10 @@
 {
   "$schema": "https://vega.github.io/schema/vega/v5.json",
   "width": 600,
-  "height": 1600,
-  "signals": [
-    {"name": "layout", "value": "tidy"},
-    {"name": "links", "value": "diagonal"},
-    {"name": "separation", "value": true},
-    {"name": "labels", "value": true}
-  ],
+  "height": 900,
   "data": [
+    {"name": "pts_store"},
+    {"name": "tree0", "url": "data/tree.json"},
     {
       "name": "tree",
       "url": "data/tree.json",
@@ -17,10 +13,11 @@
         {
           "type": "tree",
           "method": {"signal": "layout"},
-          "size":[{"signal": "height"},{"signal": "width - 100"}],
+          "size": [{"signal": "height"}, {"signal": "width - 100"}],
           "separation": {"signal": "separation"},
           "as": ["y", "x", "depth", "children"]
-        }
+        },
+        {"type": "identifier", "as": "_vgsid_"}
       ]
     },
     {
@@ -40,7 +37,7 @@
     {
       "name": "color",
       "type": "linear",
-      "range": {"scheme": "magma"},
+      "range": {"scheme": "yelloworangebrown"},
       "domain": {"data": "tree", "field": "depth"},
       "zero": true
     }
@@ -55,7 +52,9 @@
     },
     {
       "type": "symbol",
+      "name": "node",
       "from": {"data": "tree"},
+      "interactive": true,
       "encode": {
         "enter": {
           "shape": {"value": "circle"},
@@ -65,7 +64,14 @@
         "update": {
           "x": {"field": "x"},
           "y": {"field": "y"},
-          "fill": {"scale": "color", "field": "depth"}
+          "fill": [
+            {
+              "test": "!length(data(\"pts_store\")) || vlSelectionTest(\"pts_store\", datum)",
+              "scale": "color",
+              "field": "depth"
+            },
+            {"value": "grey"}
+          ]
         }
       }
     },
@@ -86,6 +92,55 @@
           "opacity": {"signal": "labels ? 1 : 0"}
         }
       }
+    }
+  ],
+  "signals": [
+    {"name": "layout", "value": "tidy"},
+    {"name": "links", "value": "diagonal"},
+    {"name": "separation", "value": true},
+    {"name": "labels", "value": true},
+    {
+      "name": "unit",
+      "value": {},
+      "on": [
+        {"events": "mousemove", "update": "isTuple(group()) ? group() : unit"}
+      ]
+    },
+    {
+      "name": "pts",
+      "update": "vlSelectionResolve(\"pts_store\", \"union\", true, true)"
+    },
+    {
+      "name": "pts_tuple",
+      "on": [
+        {
+          "events": [{"source": "scope", "type": "click"}],
+          "update": "datum && item().mark.marktype !== 'group' ? {unit: \"\", fields: pts_tuple_fields, values: [(item().isVoronoi ? datum.datum : datum)[\"_vgsid_\"]]} : null",
+          "force": true
+        },
+        {"events": [{"source": "view", "type": "dblclick"}], "update": "null"}
+      ]
+    },
+    {"name": "pts_tuple_fields", "value": [{"type": "E", "field": "_vgsid_"}]},
+    {
+      "name": "pts_toggle",
+      "value": false,
+      "on": [
+        {
+          "events": [{"source": "scope", "type": "click"}],
+          "update": "event.shiftKey"
+        },
+        {"events": [{"source": "view", "type": "dblclick"}], "update": "false"}
+      ]
+    },
+    {
+      "name": "pts_modify",
+      "on": [
+        {
+          "events": {"signal": "pts_tuple"},
+          "update": "modify(\"pts_store\", pts_toggle ? null : pts_tuple, pts_toggle ? null : true, pts_toggle ? pts_tuple : null)"
+        }
+      ]
     }
   ]
 }
