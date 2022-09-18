@@ -16,8 +16,7 @@
           "size": [{"signal": "height"}, {"signal": "width - 100"}],
           "separation": {"signal": "separation"},
           "as": ["y", "x", "depth", "children"]
-        },
-        {"type": "identifier", "as": "_vgsid_"}
+        }
       ]
     },
     {
@@ -29,6 +28,46 @@
           "type": "linkpath",
           "orient": "horizontal",
           "shape": {"signal": "links"}
+        }
+      ]
+    },
+    {"name": "sample", "values": [{"values": [36]}]},
+    {
+      "name": "tree_with_ancestors",
+      "source": ["tree"],
+      "transform": [
+        {"type": "stratify", "key": "id", "parentKey": "parent"},
+        {
+          "type": "formula",
+          "expr": "treeAncestors('tree',datum.id)",
+          "as": "my_tree_ancestor_list"
+        }
+      ]
+    },
+    {
+      "name": "tree_anc_flat",
+      "source": ["tree_with_ancestors"],
+      "transform": [
+        {"type": "flatten", "fields": ["my_tree_ancestor_list"]},
+        {
+          "type": "formula",
+          "expr": "datum.my_tree_ancestor_list.id",
+          "as": "ancId"
+        }
+      ]
+    },
+    {
+      "name": "pts_store_ext",
+      "source": ["pts_store"],
+      "transform": [{"type": "flatten", "fields": ["values"]}]
+    },
+    {
+      "name": "visible_nodes",
+      "source": ["tree_anc_flat"],
+      "transform": [
+        {
+          "type": "filter",
+          "expr": "indata('pts_store_ext', 'values', datum.ancId)"
         }
       ]
     }
@@ -66,7 +105,7 @@
           "y": {"field": "y"},
           "fill": [
             {
-              "test": "!length(data(\"pts_store\")) || vlSelectionTest(\"pts_store\", datum)",
+              "test": "!length(data(\"pts_store\")) || vlSelectionTest(\"pts_store\", datum) || indata('visible_nodes', 'id', datum.id)",
               "scale": "color",
               "field": "depth"
             },
@@ -115,13 +154,13 @@
       "on": [
         {
           "events": [{"source": "scope", "type": "click"}],
-          "update": "datum && item().mark.marktype !== 'group' ? {unit: \"\", fields: pts_tuple_fields, values: [(item().isVoronoi ? datum.datum : datum)[\"_vgsid_\"]]} : null",
+          "update": "datum && item().mark.marktype !== 'group' ? {unit: \"\", fields: pts_tuple_fields, values: [(item().isVoronoi ? datum.datum : datum)[\"id\"]]} : null",
           "force": true
         },
         {"events": [{"source": "view", "type": "dblclick"}], "update": "null"}
       ]
     },
-    {"name": "pts_tuple_fields", "value": [{"type": "E", "field": "_vgsid_"}]},
+    {"name": "pts_tuple_fields", "value": [{"type": "E", "field": "id"}]},
     {
       "name": "pts_toggle",
       "value": false,
