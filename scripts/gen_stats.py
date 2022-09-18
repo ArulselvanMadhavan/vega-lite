@@ -3,10 +3,11 @@ import torch
 import csv
 from save_load_meta_data import load_meta_data
 from scipy import stats
+import numpy as np
 
 data_dir = 'data/meta_data/'  # Data directory
 full_meta_data = load_meta_data(data_dir)
-metrics = ["bias", "weights"]
+metrics = ["bias", "weights", "inputs"]
 sample_len = 200
 with open("stats.csv", "w+") as f:
     writer = csv.writer(f)
@@ -19,10 +20,13 @@ with open("stats.csv", "w+") as f:
             m_data = data[m]
             m_data = torch.flatten(m_data)
             m_data_list = m_data.tolist()
-            kernel = stats.gaussian_kde(m_data_list)
-            samples = kernel.resample(size=sample_len, seed=31)
-            density = kernel.pdf(samples)
-            samples = samples.reshape(-1)
+            #kernel = stats.gaussian_kde(m_data_list)
+            #samples = kernel.resample(size=sample_len, seed=31)
+            #density = kernel.pdf(samples)
+            #samples = samples.reshape(-1)
+            ds_size = min(len(m_data_list), sample_len)
+            samples = np.random.choice(m_data_list, size=ds_size, replace=False)
+            density = [1] * sample_len
             # print(samples.shape, density.shape, min(density), max(density))
             # print(kernel.n)
             layer_id = nodes_dict[".".join(words_per_depth)]["id"]
