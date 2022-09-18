@@ -36,23 +36,31 @@ def check_and_insert(d, k, n, pid):
         id_count = id_count + 1
     return 
 
+def chunks_from_name(name):
+    words = word_matches.findall(name)
+    return words
+
+def group_per_depth(words):
+    if len(words) < 5:
+        return [".".join(words)]
+    else:
+        return [words[0], ".".join(words[1:4]), ".".join(words[4:])]
+    
 nodes_dict = {}
 for name in names:
     data = full_meta_data[name]
-    words = word_matches.findall(name)
-    if len(words) < 5:
+    words = chunks_from_name(name)
+    words_per_depth = group_per_depth(words)
+    if len(words_per_depth) == 1:
         check_and_insert(nodes_dict, name, name, 0)
         continue
     else:
         root = words[0]
-        l1 = ".".join(words[1:4])
-        l2 = ".".join(words[4:])
-        params = [root, l1, l2]
         check_and_insert(nodes_dict, root, root, None)
-        for p in range(1, len(params)):
-            so_far = ".".join(params[:p+1])
-            pid = nodes_dict[".".join(params[:p])]["id"]
-            check_and_insert(nodes_dict, so_far, params[p], pid)
+        for p in range(1, len(words_per_depth)):
+            so_far = ".".join(words_per_depth[:p+1])
+            pid = nodes_dict[".".join(words_per_depth[:p])]["id"]
+            check_and_insert(nodes_dict, so_far, words_per_depth[p], pid)
 
 with open("data/tree.json", "w+") as f:
     json.dump(list(nodes_dict.values()), f)
