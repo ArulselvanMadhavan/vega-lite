@@ -5,8 +5,8 @@ from save_load_meta_data import load_meta_data
 
 data_dir = 'data/meta_data/'  # Data directory
 full_meta_data = load_meta_data(data_dir)
-metrics = ["bias"]
-sample_len = 200
+metrics = ["bias", "weights", "inputs"]
+sample_len = 100
 with open("stats.csv", "w+") as f:
     writer = csv.writer(f)
     writer.writerow(["id", "metric", "layer_name", "layer_member", "value", "density"])

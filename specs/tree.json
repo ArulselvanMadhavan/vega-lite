@@ -1,138 +1,5 @@
 {
   "$schema": "https://vega.github.io/schema/vega/v5.json",
-  "width": 600,
-  "height": 900,
-  "data": [
-    {"name": "pts_store"},
-    {"name": "tree0", "url": "data/tree.json"},
-    {
-      "name": "tree",
-      "url": "data/tree.json",
-      "transform": [
-        {"type": "stratify", "key": "id", "parentKey": "parent"},
-        {
-          "type": "tree",
-          "method": {"signal": "layout"},
-          "size": [{"signal": "height"}, {"signal": "width - 100"}],
-          "separation": {"signal": "separation"},
-          "as": ["y", "x", "depth", "children"]
-        }
-      ]
-    },
-    {
-      "name": "links",
-      "source": "tree",
-      "transform": [
-        {"type": "treelinks"},
-        {
-          "type": "linkpath",
-          "orient": "horizontal",
-          "shape": {"signal": "links"}
-        }
-      ]
-    },
-    {"name": "sample", "values": [{"values": [36]}]},
-    {
-      "name": "tree_with_ancestors",
-      "source": ["tree"],
-      "transform": [
-        {"type": "stratify", "key": "id", "parentKey": "parent"},
-        {
-          "type": "formula",
-          "expr": "treeAncestors('tree',datum.id)",
-          "as": "my_tree_ancestor_list"
-        }
-      ]
-    },
-    {
-      "name": "tree_anc_flat",
-      "source": ["tree_with_ancestors"],
-      "transform": [
-        {"type": "flatten", "fields": ["my_tree_ancestor_list"]},
-        {
-          "type": "formula",
-          "expr": "datum.my_tree_ancestor_list.id",
-          "as": "ancId"
-        }
-      ]
-    },
-    {
-      "name": "pts_store_ext",
-      "source": ["pts_store"],
-      "transform": [{"type": "flatten", "fields": ["values"]}]
-    },
-    {
-      "name": "visible_nodes",
-      "source": ["tree_anc_flat"],
-      "transform": [
-        {
-          "type": "filter",
-          "expr": "indata('pts_store_ext', 'values', datum.ancId)"
-        }
-      ]
-    }
-  ],
-  "scales": [
-    {
-      "name": "color",
-      "type": "linear",
-      "range": {"scheme": "yelloworangebrown"},
-      "domain": {"data": "tree", "field": "depth"},
-      "zero": true
-    }
-  ],
-  "marks": [
-    {
-      "type": "path",
-      "from": {"data": "links"},
-      "encode": {
-        "update": {"path": {"field": "path"}, "stroke": {"value": "#ccc"}}
-      }
-    },
-    {
-      "type": "symbol",
-      "name": "node",
-      "from": {"data": "tree"},
-      "interactive": true,
-      "encode": {
-        "enter": {
-          "shape": {"value": "circle"},
-          "size": {"value": 100},
-          "stroke": {"value": "#fff"}
-        },
-        "update": {
-          "x": {"field": "x"},
-          "y": {"field": "y"},
-          "fill": [
-            {
-              "test": "!length(data(\"pts_store\")) || vlSelectionTest(\"pts_store\", datum) || indata('visible_nodes', 'id', datum.id)",
-              "scale": "color",
-              "field": "depth"
-            },
-            {"value": "grey"}
-          ]
-        }
-      }
-    },
-    {
-      "type": "text",
-      "from": {"data": "tree"},
-      "encode": {
-        "enter": {
-          "text": {"field": "name"},
-          "fontSize": {"value": 9},
-          "baseline": {"value": "middle"}
-        },
-        "update": {
-          "x": {"field": "x"},
-          "y": {"field": "y"},
-          "dx": {"signal": "datum.children ? -7 : 7"},
-          "align": {"signal": "datum.children ? 'right' : 'left'"},
-          "opacity": {"signal": "labels ? 1 : 0"}
-        }
-      }
-    }
-  ],
   "signals": [
     {"name": "layout", "value": "tidy"},
     {"name": "links", "value": "diagonal"},
@@ -178,6 +45,414 @@
         {
           "events": {"signal": "pts_tuple"},
           "update": "modify(\"pts_store\", pts_toggle ? null : pts_tuple, pts_toggle ? null : true, pts_toggle ? pts_tuple : null)"
+        }
+      ]
+    },
+    {"name": "tree_height", "value": 900},
+    {"name": "tree_width", "value": 200},
+    {"name": "domainMax", "value": 5}
+  ],
+  "data": [
+    {"name": "pts_store"},
+    {"name": "tree0", "url": "data/tree.json"},
+    {
+      "name": "tree",
+      "url": "data/tree.json",
+      "transform": [
+        {"type": "stratify", "key": "id", "parentKey": "parent"},
+        {
+          "type": "tree",
+          "method": {"signal": "layout"},
+          "size": [{"signal": "tree_height"}, {"signal": "tree_width - 100"}],
+          "separation": {"signal": "separation"},
+          "as": ["y", "x", "depth", "children"]
+        }
+      ]
+    },
+    {
+      "name": "links",
+      "source": "tree",
+      "transform": [
+        {"type": "treelinks"},
+        {
+          "type": "linkpath",
+          "orient": "horizontal",
+          "shape": {"signal": "links"}
+        }
+      ]
+    },
+    {
+      "name": "tree_with_ancestors",
+      "source": ["tree"],
+      "transform": [
+        {"type": "stratify", "key": "id", "parentKey": "parent"},
+        {
+          "type": "formula",
+          "expr": "treeAncestors('tree',datum.id)",
+          "as": "my_tree_ancestor_list"
+        }
+      ]
+    },
+    {
+      "name": "tree_anc_flat",
+      "source": ["tree_with_ancestors"],
+      "transform": [
+        {"type": "flatten", "fields": ["my_tree_ancestor_list"]},
+        {
+          "type": "formula",
+          "expr": "datum.my_tree_ancestor_list.id",
+          "as": "ancId"
+        }
+      ]
+    },
+    {
+      "name": "pts_store_ext",
+      "source": ["pts_store"],
+      "transform": [{"type": "flatten", "fields": ["values"]}]
+    },
+    {
+      "name": "visible_nodes",
+      "source": ["tree_anc_flat"],
+      "transform": [
+        {
+          "type": "filter",
+          "expr": "indata('pts_store_ext', 'values', datum.ancId)"
+        }
+      ]
+    },
+    {
+      "name": "stats_0",
+      "url": "data/stats.csv",
+      "format": {"type": "csv", "parse": "auto"},
+      "transform": [
+        {
+          "type": "filter",
+          "expr": "length(data('visible_nodes')) ? indata('visible_nodes', 'id', datum.id) : indata('tree', 'id', datum.id)"
+        }
+      ]
+    }
+  ],
+  "layout": {"columns": 2, "padding": 30},
+  "marks": [
+    {
+      "type": "group",
+      "style": "cell",
+      "name": "tree_cell",
+      "scales": [
+        {
+          "name": "color",
+          "type": "linear",
+          "range": {"scheme": "yelloworangebrown"},
+          "domain": {"data": "tree", "field": "depth"},
+          "zero": true
+        }
+      ],
+      "marks": [
+        {
+          "type": "path",
+          "from": {"data": "links"},
+          "encode": {
+            "update": {"path": {"field": "path"}, "stroke": {"value": "#ccc"}}
+          }
+        },
+        {
+          "type": "symbol",
+          "name": "node",
+          "from": {"data": "tree"},
+          "interactive": true,
+          "encode": {
+            "enter": {
+              "shape": {"value": "circle"},
+              "size": {"value": 100},
+              "stroke": {"value": "#fff"}
+            },
+            "update": {
+              "x": {"field": "x"},
+              "y": {"field": "y"},
+              "fill": [
+                {
+                  "test": "!length(data(\"pts_store\")) || vlSelectionTest(\"pts_store\", datum) || indata('visible_nodes', 'id', datum.id)",
+                  "scale": "color",
+                  "field": "depth"
+                },
+                {"value": "grey"}
+              ]
+            }
+          }
+        },
+        {
+          "type": "text",
+          "from": {"data": "tree"},
+          "encode": {
+            "enter": {
+              "text": {"field": "name"},
+              "fontSize": {"value": 9},
+              "baseline": {"value": "middle"}
+            },
+            "update": {
+              "x": {"field": "x"},
+              "y": {"field": "y"},
+              "dx": {"signal": "datum.children ? -7 : 7"},
+              "align": {"signal": "datum.children ? 'right' : 'left'"},
+              "opacity": {"signal": "labels ? 1 : 0"}
+            }
+          }
+        }
+      ]
+    },
+    {
+      "layout": {"columns": 1},
+      "type": "group",
+      "name": "metrics_group",
+      "data": [
+        {
+          "name": "metrics_domain",
+          "source": "stats_0",
+          "transform": [{"type": "aggregate", "groupby": ["metric"]}]
+        }
+      ],
+      "signals": [
+        {"name": "stats_width", "value": 150},
+        {"name": "stats_height", "value": 380}
+      ],
+      "marks": [
+        {
+          "type": "group",
+          "name": "metric_row_title",
+          "style": "cell",
+          "role": "row-header",
+          "from": {"data": "metrics_domain"},
+          "title": {
+            "text": {"signal": "parent[\"metric\"]"},
+            "style": "guide-label",
+            "frame": "group",
+            "orient": "left",
+            "align": "center"
+          },
+          "encode": {"enter": {"height": {"signal": "stats_height"}}}
+        },
+        {
+          "type": "group",
+          "style": "cell",
+          "name": "metrics_cell",
+          "from": {
+            "facet": {
+              "data": "stats_0",
+              "name": "metric",
+              "groupby": ["metric"]
+            }
+          },
+          "sort": {"field": ["datum[\"metric\"]"], "order": ["ascending"]},
+          "layout": {"columns": 1, "align": "all"},
+          "marks": [
+            {
+              "type": "group",
+              "style": "cell",
+              "name": "stats_cell",
+              "data": [
+                {
+                  "name": "column_domain",
+                  "source": "metric",
+                  "transform": [
+                    {"type": "aggregate", "groupby": ["layer_member"]}
+                  ]
+                }
+              ],
+              "layout": {
+                "padding": 5,
+                "offset": {"columnTitle": 10},
+                "columns": {"signal": "length(data('column_domain'))"},
+                "bounds": "full",
+                "align": "all"
+              },
+              "marks": [
+                {
+                  "name": "column_footer",
+                  "type": "group",
+                  "role": "column-footer",
+                  "style": "cell",
+                  "from": {"data": "column_domain"},
+                  "encode": {"update": {"width": {"signal": "stats_width"}}},
+                  "title": {
+                    "text": {"signal": "parent[\"layer_member\"]"},
+                    "style": "guide-label",
+                    "frame": "group",
+                    "orient": "bottom"
+                  },
+                  "axes": [
+                    {
+                      "scale": "stats_xscale",
+                      "orient": "bottom",
+                      "grid": false,
+                      "labelFlush": true,
+                      "labelOverlap": true,
+                      "tickCount": {"signal": "ceil(stats_width/40)"},
+                      "ticks": true,
+                      "zindex": 0,
+                      "offset": 0
+                    }
+                  ]
+                },
+                {
+                  "type": "group",
+                  "style": "cell",
+                  "name": "cell",
+                  "from": {
+                    "facet": {
+                      "name": "member",
+                      "data": "metric",
+                      "groupby": ["layer_member"]
+                    }
+                  },
+                  "sort": {
+                    "field": ["datum[\"layer_member\"]"],
+                    "order": ["ascending"]
+                  },
+                  "encode": {
+                    "update": {
+                      "width": {"signal": "stats_width"},
+                      "height": {"signal": "stats_height"}
+                    }
+                  },
+                  "marks": [
+                    {
+                      "type": "group",
+                      "from": {
+                        "facet": {
+                          "data": "member",
+                          "name": "category",
+                          "groupby": "layer_name"
+                        }
+                      },
+                      "encode": {
+                        "update": {
+                          "y": {"field": "layer_name", "scale": "stats_yscale"},
+                          "width": {"signal": "stats_width"},
+                          "height": {"scale": "stats_yscale", "band": 1}
+                        }
+                      },
+                      "signals": [
+                        {
+                          "name": "height",
+                          "update": "bandwidth('stats_yscale')"
+                        }
+                      ],
+                      "scales": [
+                        {
+                          "name": "yinner",
+                          "type": "linear",
+                          "range": [{"signal": "height"}, 0],
+                          "domain": [0, {"signal": "domainMax"}]
+                        }
+                      ],
+                      "marks": [
+                        {
+                          "type": "area",
+                          "from": {"data": "category"},
+                          "encode": {
+                            "enter": {
+                              "fill": {
+                                "scale": "color",
+                                "field": {"parent": "layer_name"}
+                              },
+                              "fillOpacity": {"value": 0.7},
+                              "stroke": {"value": "white"},
+                              "strokeWidth": {"value": 1}
+                            },
+                            "update": {
+                              "x": {"scale": "stats_xscale", "field": "value"},
+                              "y": {
+                                "scale": "yinner",
+                                "signal": "datum.density > domainMax * 3 ? domainMax * 3 : datum.density"
+                              },
+                              "y2": {"scale": "yinner", "value": 0}
+                            }
+                          }
+                        },
+                        {
+                          "type": "rule",
+                          "clip": true,
+                          "encode": {
+                            "update": {
+                              "y": {"signal": "height", "offset": -0.5},
+                              "x": {
+                                "scale": "stats_xscale",
+                                "field": {"parent": "value"}
+                              },
+                              "x2": {"signal": "stats_width"},
+                              "stroke": {"value": "#aaa"},
+                              "strokeWidth": {"value": 0.25},
+                              "strokeOpacity": {"value": 1}
+                            }
+                          }
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ],
+              "scales": [
+                {
+                  "name": "stats_xscale",
+                  "type": "linear",
+                  "domain": {"data": "metric", "field": "value"},
+                  "range": [0, {"signal": "stats_width"}],
+                  "nice": true,
+                  "zero": true
+                },
+                {
+                  "name": "stats_yscale",
+                  "type": "band",
+                  "range": [0, {"signal": "stats_height"}],
+                  "round": true,
+                  "padding": 0,
+                  "domain": {"data": "metric", "field": "layer_name"}
+                },
+                {
+                  "name": "color",
+                  "type": "ordinal",
+                  "domain": {
+                    "fields": [{"data": "metric", "field": "layer_name"}]
+                  },
+                  "range": "category"
+                }
+              ],
+              "axes": [
+                {
+                  "scale": "stats_xscale",
+                  "orient": "bottom",
+                  "domain": false,
+                  "labels": false,
+                  "aria": false,
+                  "maxExtent": 0,
+                  "minExtent": 0,
+                  "ticks": false,
+                  "zindex": 0
+                },
+                {
+                  "orient": "left",
+                  "scale": "stats_yscale",
+                  "domain": false,
+                  "ticks": false,
+                  "encode": {
+                    "labels": {
+                      "update": {
+                        "width": {"signal": "stats_width"},
+                        "dx": {"value": 0},
+                        "dy": {"value": 0},
+                        "y": {
+                          "scale": "stats_yscale",
+                          "field": "value",
+                          "band": 1
+                        },
+                        "baseline": {"value": "bottom"}
+                      }
+                    }
+                  }
+                }
+              ]
+            }
+          ]
         }
       ]
     }
