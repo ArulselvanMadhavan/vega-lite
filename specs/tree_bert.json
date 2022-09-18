@@ -1,0 +1,200 @@
+    {
+      "type": "group",
+      "style": "cell",
+      "name": "stats_cell",
+      "signals": [
+        {"name": "stats_width", "value": 150},
+        {"name": "stats_height", "value": 380}
+      ],
+      "data": [
+        {
+          "name": "column_domain",
+          "source": "metric",
+          "transform": [{"type": "aggregate", "groupby": ["layer_member"]}]
+        }
+      ],
+      "layout": {
+        "padding": 5,
+        "offset": {"columnTitle": 10},
+        "columns": {"signal": "length(data('column_domain'))"},
+        "bounds": "full",
+        "align": "all"
+      },
+      "marks": [
+        {
+          "name": "column_footer",
+          "type": "group",
+          "role": "column-footer",
+          "style": "cell",
+          "from": {"data": "column_domain"},
+          "encode": {"update": {"width": {"signal": "stats_width"}}},
+          "title": {
+            "text": {"signal": "parent[\"layer_member\"]"},
+            "style": "guide-label",
+            "frame": "group",
+            "orient": "bottom"
+          },
+          "axes": [
+            {
+              "scale": "stats_xscale",
+              "orient": "bottom",
+              "grid": false,
+              "labelFlush": true,
+              "labelOverlap": true,
+              "tickCount": {"signal": "ceil(stats_width/40)"},
+              "ticks": true,
+              "zindex": 0,
+              "offset": 0
+            }
+          ]
+        },
+        {
+          "type": "group",
+          "style": "cell",
+          "name": "cell",
+          "from": {
+            "facet": {
+              "name": "member",
+              "data": "metric",
+              "groupby": ["layer_member"]
+            }
+          },
+          "sort": {
+            "field": ["datum[\"layer_member\"]"],
+            "order": ["ascending"]
+          },
+          "encode": {
+            "update": {
+              "width": {"signal": "stats_width"},
+              "height": {"signal": "stats_height"}
+            }
+          },
+          "marks": [
+            {
+              "type": "group",
+              "from": {
+                "facet": {
+                  "data": "member",
+                  "name": "category",
+                  "groupby": "layer_name"
+                }
+              },
+              "encode": {
+                "update": {
+                  "y": {"field": "layer_name", "scale": "stats_yscale"},
+                  "width": {"signal": "stats_width"},
+                  "height": {"scale": "stats_yscale", "band": 1}
+                }
+              },
+              "signals": [
+                {"name": "height", "update": "bandwidth('stats_yscale')"}
+              ],
+              "scales": [
+                {
+                  "name": "yinner",
+                  "type": "linear",
+                  "range": [{"signal": "height"}, 0],
+                  "domain": [0, {"signal": "domainMax"}]
+                }
+              ],
+              "marks": [
+                {
+                  "type": "area",
+                  "from": {"data": "category"},
+                  "encode": {
+                    "enter": {
+                      "fill": {
+                        "scale": "color",
+                        "field": {"parent": "layer_name"}
+                      },
+                      "fillOpacity": {"value": 0.7},
+                      "stroke": {"value": "white"},
+                      "strokeWidth": {"value": 1}
+                    },
+                    "update": {
+                      "x": {"scale": "stats_xscale", "field": "value"},
+                      "y": {
+                        "scale": "yinner",
+                        "signal": "datum.density > domainMax * 3 ? domainMax * 3 : datum.density"
+                      },
+                      "y2": {"scale": "yinner", "value": 0}
+                    }
+                  }
+                },
+                {
+                  "type": "rule",
+                  "clip": true,
+                  "encode": {
+                    "update": {
+                      "y": {"signal": "height", "offset": -0.5},
+                      "x": {
+                        "scale": "stats_xscale",
+                        "field": {"parent": "value"}
+                      },
+                      "x2": {"signal": "stats_width"},
+                      "stroke": {"value": "#aaa"},
+                      "strokeWidth": {"value": 0.25},
+                      "strokeOpacity": {"value": 1}
+                    }
+                  }
+                }
+              ]
+            }
+          ]
+        }
+      ],
+      "scales": [
+        {
+          "name": "stats_xscale",
+          "type": "linear",
+          "domain": {"data": "metric", "field": "value"},
+          "range": [0, {"signal": "stats_width"}],
+          "nice": true,
+          "zero": true
+        },
+        {
+          "name": "stats_yscale",
+          "type": "band",
+          "range": [0, {"signal": "stats_height"}],
+          "round": true,
+          "padding": 0,
+          "domain": {"data": "metric", "field": "layer_name"}
+        },
+        {
+          "name": "color",
+          "type": "ordinal",
+          "domain": {"fields": [{"data": "metric", "field": "layer_name"}]},
+          "range": "category"
+        }
+      ],
+      "axes": [
+        {
+          "scale": "stats_xscale",
+          "orient": "bottom",
+          "domain": false,
+          "labels": false,
+          "aria": false,
+          "maxExtent": 0,
+          "minExtent": 0,
+          "ticks": false,
+          "zindex": 0
+        },
+        {
+          "orient": "left",
+          "scale": "stats_yscale",
+          "domain": false,
+          "ticks": false,
+          "encode": {
+            "labels": {
+              "update": {
+                "width": {"signal": "stats_width"},
+                "dx": {"value": 0},
+                "dy": {"value": 0},
+                "y": {"scale": "stats_yscale", "field": "value", "band": 1},
+                "baseline": {"value": "bottom"}
+              }
+            }
+          }
+        }
+      ]
+    }
